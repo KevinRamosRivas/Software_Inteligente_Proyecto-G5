@@ -15,14 +15,14 @@ from sklearn.neighbors import NearestNeighbors
 import joblib
 
 # importamos el dataset que contiene los datos de los animes
-anime = pd.read_csv('Anime_Data_G5.csv')
+anime = pd.read_csv('https://raw.githubusercontent.com/KevinRamosRivas/Software_Inteligente_Proyecto-G5/main/Anime_Data_G5.CSV')
 #renombramos la columna de Id Anime a anime_id
 anime.rename(columns={'Id Anime':'anime_id'}, inplace=True)
 #leer los animes relevantes
-anime_relevantes = pd.read_csv('anime_relevantes.csv')
+anime_relevantes = pd.read_csv('https://raw.githubusercontent.com/KevinRamosRivas/Software_Inteligente_Proyecto-G5/main/anime_relevantes.csv')
 
 #importamos el dataset que contiene los datos de los usuarios
-df = pd.read_csv('User_Data_G5.csv')
+df = pd.read_csv('https://raw.githubusercontent.com/KevinRamosRivas/Software_Inteligente_Proyecto-G5/main/User_Data_G5.csv')
 
 #renombramos las columnas del dataset de usuarios
 #cambiamos el nombre de la columna Id anime por anime_id
@@ -40,10 +40,10 @@ df = df.groupby('anime_id').filter(lambda x : len(x)>10)
 
 
 #cargamos el archivo anime_features_df_matrix.npz
-anime_features_df_matrix = sparse.load_npz("anime_features_df_matrix.npz")
+anime_features_df_matrix = sparse.load_npz(open("anime_features_df_matrix.npz", 'rb'))
 
 # cargar el modelo
-model_nearest = joblib.load('model_nearest_G5.pkl')
+model_nearest = joblib.load(open('model_nearest_G5.pk', 'rb'))
 
 #tomar solo 80000 usuarios al azar
 df = df.sample(n=80000, random_state=123)
