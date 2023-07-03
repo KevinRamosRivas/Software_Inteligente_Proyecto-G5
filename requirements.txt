@@ -3,5 +3,6 @@ pandas
 scikit-learn
 scipy
 joblib
+pickle
 
 

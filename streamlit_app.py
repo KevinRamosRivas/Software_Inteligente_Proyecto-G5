@@ -12,7 +12,7 @@ import sklearn
 # importamos la libreria para el modelo de recomendacion
 from sklearn.neighbors import NearestNeighbors
 #guardar el modelo para usarlo en el futuro
-import joblib
+import pickle
 
 # importamos el dataset que contiene los datos de los animes
 anime = pd.read_csv('./data/Anime_Data_G5.csv')
@@ -43,7 +43,7 @@ df = df.groupby('anime_id').filter(lambda x : len(x)>10)
 anime_features_df_matrix = sparse.load_npz("./data/anime_features_df_matrix.npz")
 
 # cargar el modelo
-model_nearest = joblib.load('./data/model_nearest_G5.pkl')
+model_nearest = pickle.load(open('./data/model_nearest.pkl', 'rb'))
 
 #tomar solo 80000 usuarios al azar
 df = df.sample(n=80000, random_state=123)
