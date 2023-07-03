@@ -6,7 +6,14 @@ import streamlit as st
 #guardar anime_features_df_matrix en un archivo para usarlo en el notebook de recomendacion
 from scipy import sparse
 import skops.io as sio
+# importar librerias para hacer web scraping
+import requests
+from bs4 import BeautifulSoup
+import re
 
+
+# Poner un Titulo
+st.title('Sistema de recomendación de animes de filtro colaborativo usando clustering')
 # importamos el dataset que contiene los datos de los animes
 anime = pd.read_csv('./data/Anime_Data_G5.csv')
 #renombramos la columna de Id Anime a anime_id
@@ -62,10 +69,11 @@ class AnimeRecommender:
     def get_anime_recommendation(self, anime_id):
         #obtener la posicion del anime en la matriz
         anime_localizado = ratings_matrix.loc[ratings_matrix.index.get_level_values('anime_id') == anime_id]
+        if len(anime_localizado) == 0:
+            st.write("No se encontro el anime")
+            return
         #buscar un anime por su id
         query_index = ratings_matrix.index.get_loc(anime_localizado.index[0])
-        st.write("recomendation para anime id:",query_index)
-        st.write("Nombre del anime:",anime_localizado.index[0][0])
         distances, indices = self.k_model.kneighbors(ratings_matrix.iloc[query_index,:].values.reshape(1, -1), n_neighbors = self.k)
         #obtener los indices de los animes recomendados
         indices = indices.flatten()
@@ -174,25 +182,67 @@ anime_id = st.text_input("Ingrese el id del anime", "1")
 if st.button('Obtener recomendaciones'):
     # instanciamos la clase ContentRecommender
     anime_recommender = AnimeRecommender(model_nearest,anime_features_df_matrix,anime_relevantes,15)
-    #obtenemos las recomendaciones
-    recomendaciones = anime_recommender.get_anime_recommendation(int(anime_id))
-    #mostramos las recomendaciones
-    st.write(recomendaciones)
-    #obtenemos la precision de las recomendaciones
-    precision = anime_recommender.calculate_precion_all()
-    #mostramos la precision de las recomendaciones
-    st.write(precision)
-    #obtenemos el recall de las recomendaciones
-    recall = anime_recommender.calculate_recall_all()
-    #mostramos el recall de las recomendaciones
-    st.write(recall)
+    if anime_recommender == None:
+        st.write("No se encontro el anime")
+    else:
+        #hacer scraping de la pagina de myanimelist
+        url = 'https://myanimelist.net/anime/'+str(anime_id)
+        # añadir el header
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        #hacer el request a la pagina
+        page = requests.get(url, headers=headers)
+        #parsear el html
+        soup = BeautifulSoup(page.content, 'html.parser')
+        # obtener un div con clase leftside
+        div = soup.find('div', class_='leftside')
+        # obtener el div con clase text-align: center;
+        div = div.find('div', style='text-align: center;')
+        # buscar la etiqueta a
+        a = div.find('a')
+        #obtener todas las imagenes dentro de la etiqueta a
+        img = a.find_all('img')
+        #obtener la url de la imagen
+        img = img[0]['data-src']
+        # buscar el titulo del anime
+        titulo = soup.find('div', class_='h1-title')
+        # obtener el texto del titulo
+        titulo = titulo.text
+        # obtener el resumen del anime
+        resumen = soup.find('p', itemprop='description')
+        # obtener el texto del resumen
+        resumen = resumen.text
+        # hacer un bloque que divida en dos columnas
+        col1, col2 = st.columns(2)
+        # mostrar la imagen del anime
+        col1.image(img, use_column_width=True)
+        # mostrar el titulo del anime
+        col2.header(titulo)
+        # mostrar el resumen del anime
+        col2.write(resumen)
+        #obtenemos las recomendaciones
+        recomendaciones = anime_recommender.get_anime_recommendation(int(anime_id))
+        # ordenar las recomendaciones por su Puntaucion general
+        recomendaciones = recomendaciones.sort_values(by='Puntuacion general',ascending=False)
+        # poner un subtitulo
+        st.subheader('Recomendaciones')
+        #mostramos las recomendaciones
+        st.write(recomendaciones)
+        #obtenemos la precision de las recomendaciones
+        precision = anime_recommender.calculate_precion_all()
+        st.subheader('Precision y recall del modelo')
+        #mostramos la precision de las recomendaciones
+        st.write(precision)
+        #obtenemos el recall de las recomendaciones
+        recall = anime_recommender.calculate_recall_all()
+        #mostramos el recall de las recomendaciones
+        st.write(recall)
 
 
 
 
 
 #hacer un footer
-st.write('Hecho por [Kevin Ramos Rivas](https://github.com/KevinRamosRivas) 👨‍💻')
+st.write('Hecho para el curso de Software Inteligente - G5')
 
 
 
