@@ -1,7 +1,7 @@
 streamlit
 pandas
-scypi
 scikit-learn
+scipy
 joblib
 
 
