@@ -2,11 +2,9 @@
 #importar librerias para scraping
 #importamos las librerias necesarias
 import pandas as pd
-
 import streamlit as st
 #guardar anime_features_df_matrix en un archivo para usarlo en el notebook de recomendacion
 from scipy import sparse
-import sklearn
 import skops.io as sio
 
 # importamos el dataset que contiene los datos de los animes
