@@ -7,7 +7,7 @@ import streamlit as st
 #guardar anime_features_df_matrix en un archivo para usarlo en el notebook de recomendacion
 from scipy import sparse
 import sklearn
-from joblib import dump, load
+import skops.io as sio
 
 # importamos el dataset que contiene los datos de los animes
 anime = pd.read_csv('./data/Anime_Data_G5.csv')
@@ -38,7 +38,7 @@ df = df.groupby('anime_id').filter(lambda x : len(x)>10)
 anime_features_df_matrix = sparse.load_npz("./data/anime_features_df_matrix.npz")
 
 # cargar el modelo
-model_nearest = load('./data/model_nearest.joblib')
+model_nearest = sio.load('./data/model_nearest.skops', trusted=True)
 
 #tomar solo 80000 usuarios al azar
 df = df.sample(n=80000, random_state=123)
